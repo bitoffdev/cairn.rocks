@@ -1,11 +1,7 @@
 name = "cairn-rocks"
-main = "src/worker.ts"
 compatibility_date = "2024-03-20"
 
-[site]
-bucket = "./dist"
-include = ["**/*"]
-exclude = []
+assets = { directory = "./dist" }
 
 [build]
 command = "npm run build" 
