@@ -1,16 +1,20 @@
 export default {
   async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
     try {
-      // Get the URL from the request
       const url = new URL(request.url);
+      const path = url.pathname;
+
+      // Try to fetch the asset first
+      const assetResponse = await env.ASSETS.fetch(request);
       
-      // Serve index.html for the root path
-      if (url.pathname === '/') {
-        return env.ASSETS.fetch(new Request(`${url.origin}/index.html`));
+      // If the asset exists, return it
+      if (assetResponse.status === 200) {
+        return assetResponse;
       }
 
-      // Serve other assets
-      return env.ASSETS.fetch(request);
+      // For all other routes, serve index.html
+      // This enables client-side routing
+      return env.ASSETS.fetch(new Request(`${url.origin}/index.html`));
     } catch (e) {
       // If there's an error, return a 404
       return new Response('Not Found', { status: 404 });
