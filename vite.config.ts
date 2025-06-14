@@ -7,4 +7,17 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    target: 'esnext',
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        format: 'es',
+      },
+    },
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
 });
