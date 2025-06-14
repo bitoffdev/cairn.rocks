@@ -2,22 +2,28 @@ export default {
   async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
     try {
       const url = new URL(request.url);
-      const path = url.pathname;
-
-      // Try to fetch the asset first
-      const assetResponse = await env.ASSETS.fetch(request);
       
-      // If the asset exists, return it
-      if (assetResponse.status === 200) {
-        return assetResponse;
+      // Check if static content bindings exist
+      if (!env.__STATIC_CONTENT_MANIFEST || !env.__STATIC_CONTENT) {
+        console.error('Static content bindings are not available');
+        return new Response('Configuration Error', { status: 500 });
       }
 
-      // For all other routes, serve index.html
-      // This enables client-side routing
-      return env.ASSETS.fetch(new Request(`${url.origin}/index.html`));
+      // Serve index.html for the root path
+      if (url.pathname === '/') {
+        return env.__STATIC_CONTENT.fetch(new Request(`${url.origin}/index.html`));
+      }
+
+      // Try to serve the requested asset
+      try {
+        return await env.__STATIC_CONTENT.fetch(request);
+      } catch (assetError) {
+        console.error('Error fetching asset:', assetError);
+        return new Response('Not Found', { status: 404 });
+      }
     } catch (e) {
-      // If there's an error, return a 404
-      return new Response('Not Found', { status: 404 });
+      console.error('Error handling request:', e);
+      return new Response('Internal Server Error', { status: 500 });
     }
   },
 }; 
